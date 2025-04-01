@@ -1,8 +1,7 @@
 name: cached_video_player_plus
 description: "Original video_player plugin with the superpower of caching embedded in Android, iOS and macOS."
 version: 3.0.3
-homepage: https://outdatedguy.rocks
-repository: https://github.com/OutdatedGuy/cached_video_player_plus
+publish_to: "none"
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
@@ -14,7 +13,10 @@ dependencies:
   flutter_cache_manager: ^3.0.0
   get_storage: ^2.0.0
   html: ^0.15.0
-  video_player_android: ^2.0.0
+  video_player_android:
+    git:
+      url: https://github.com/Azazaliazaz/android_video_player
+      ref: main
   video_player_avfoundation: ^2.0.0
   video_player_platform_interface: ^6.1.0
   video_player_web: ^2.0.0

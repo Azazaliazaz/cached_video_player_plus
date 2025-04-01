@@ -6,25 +6,9 @@ import 'dart:convert';
 
 import 'closed_caption_file.dart';
 
-/// Represents a [ClosedCaptionFile], parsed from the SubRip file format.
-/// See: https://en.wikipedia.org/wiki/SubRip
-class SubRipCaptionFile extends ClosedCaptionFile {
-  /// Parses a string into a [ClosedCaptionFile], assuming [fileContents] is in
-  /// the SubRip file format.
-  /// * See: https://en.wikipedia.org/wiki/SubRip
-  SubRipCaptionFile(this.fileContents)
-      : _captions = _parseCaptionsFromSubRipString(fileContents);
+const String _subRipArrow = r' --> ';
 
-  /// The entire body of the SubRip file.
-  // TODO(cyanglaz): Remove this public member as it doesn't seem need to exist.
-  // https://github.com/flutter/flutter/issues/90471
-  final String fileContents;
-
-  @override
-  List<Caption> get captions => _captions;
-
-  final List<Caption> _captions;
-}
+const String _subRipTimeStamp = r'\d\d:\d\d:\d\d,\d\d\d';
 
 List<Caption> _parseCaptionsFromSubRipString(String file) {
   final List<Caption> captions = <Caption>[];
@@ -51,32 +35,6 @@ List<Caption> _parseCaptionsFromSubRipString(String file) {
   }
 
   return captions;
-}
-
-class _CaptionRange {
-  _CaptionRange(this.start, this.end);
-
-  final Duration start;
-  final Duration end;
-
-  // Assumes format from an SubRip file.
-  // For example:
-  // 00:01:54,724 --> 00:01:56,760
-  static _CaptionRange fromSubRipString(String line) {
-    final RegExp format =
-        RegExp(_subRipTimeStamp + _subRipArrow + _subRipTimeStamp);
-
-    if (!format.hasMatch(line)) {
-      return _CaptionRange(Duration.zero, Duration.zero);
-    }
-
-    final List<String> times = line.split(_subRipArrow);
-
-    final Duration start = _parseSubRipTimestamp(times[0]);
-    final Duration end = _parseSubRipTimestamp(times[1]);
-
-    return _CaptionRange(start, end);
-  }
 }
 
 // Parses a time stamp in an SubRip file into a Duration.
@@ -131,5 +89,48 @@ List<List<String>> _readSubRipFile(String file) {
   return captionStrings;
 }
 
-const String _subRipTimeStamp = r'\d\d:\d\d:\d\d,\d\d\d';
-const String _subRipArrow = r' --> ';
+/// Represents a [ClosedCaptionFile], parsed from the SubRip file format.
+/// See: https://en.wikipedia.org/wiki/SubRip
+class SubRipCaptionFile extends ClosedCaptionFile {
+  /// The entire body of the SubRip file.
+  // TODO(cyanglaz): Remove this public member as it doesn't seem need to exist.
+  // https://github.com/flutter/flutter/issues/90471
+  final String fileContents;
+
+  final List<Caption> _captions;
+
+  /// Parses a string into a [ClosedCaptionFile], assuming [fileContents] is in
+  /// the SubRip file format.
+  /// * See: https://en.wikipedia.org/wiki/SubRip
+  SubRipCaptionFile(this.fileContents)
+      : _captions = _parseCaptionsFromSubRipString(fileContents);
+
+  @override
+  List<Caption> get captions => _captions;
+}
+
+class _CaptionRange {
+  final Duration start;
+
+  final Duration end;
+  _CaptionRange(this.start, this.end);
+
+  // Assumes format from an SubRip file.
+  // For example:
+  // 00:01:54,724 --> 00:01:56,760
+  static _CaptionRange fromSubRipString(String line) {
+    final RegExp format =
+        RegExp(_subRipTimeStamp + _subRipArrow + _subRipTimeStamp);
+
+    if (!format.hasMatch(line)) {
+      return _CaptionRange(Duration.zero, Duration.zero);
+    }
+
+    final List<String> times = line.split(_subRipArrow);
+
+    final Duration start = _parseSubRipTimestamp(times[0]);
+    final Duration end = _parseSubRipTimestamp(times[1]);
+
+    return _CaptionRange(start, end);
+  }
+}
